@@ -31,19 +31,17 @@ Phase 1 is **web + API**. Mobile is Phase 2. You can ship a live beta with fake-
    - **Root Directory:** leave **empty** (repo root `/`)
    - **Config file:** `services/api/railway.toml` (Railway default for this service)
    - Builds `services/api/Dockerfile` from the monorepo root
-4. Add a **Postgres** plugin and **Redis** plugin (or link external URLs).
-5. Add **environment variables** on the API service:
+4. Add **Postgres** (+ optional **Redis**) — see **[RAILWAY.md](./RAILWAY.md)** for linking `DATABASE_URL` (fixes the crash loop).
+5. On **@parity/api** → **Variables**, add:
 
 ```env
-DATABASE_URL=postgresql://...
-REDIS_URL=redis://...
+DATABASE_URL=${{Postgres.DATABASE_URL}}   # use "Add Reference" in Railway UI
+REDIS_URL=${{Redis.REDIS_URL}}             # optional; reference from Redis plugin
 JWT_SECRET=<openssl rand -hex 32>
 WEB_URL=https://your-app.vercel.app
 API_URL=https://your-api.up.railway.app
 DEV_AUTH_ENABLED=false
 PORT=4000
-GOOGLE_CLIENT_ID=
-GOOGLE_CLIENT_SECRET=
 ```
 
 5. After first deploy, open Railway **Shell** or run locally against prod DB:
