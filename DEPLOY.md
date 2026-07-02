@@ -23,10 +23,15 @@ Phase 1 is **web + API**. Mobile is Phase 2. You can ship a live beta with fake-
 
 ## Step 2 — Deploy API (Railway)
 
-1. [railway.app](https://railway.app) → **New Project** → **Deploy from GitHub** → select `Parity`.
-2. Set **Root Directory** to `services/api`.
-3. Railway will use `Dockerfile` + `railway.toml`.
-4. Add **environment variables**:
+**Important:** Only deploy the **API** on Railway. Delete any `@parity/web` service — web goes on Vercel.
+
+1. [railway.app](https://railway.app) → your project.
+2. If you see two services (`@parity/web` + `@parity/api`), **delete `@parity/web`**.
+3. Click `@parity/api` → **Settings** → **Source**:
+   - **Root Directory:** leave **empty** (repo root `/`), **not** `services/api`
+   - Railway reads `railway.toml` at repo root and builds `services/api/Dockerfile`
+4. Add a **Postgres** plugin and **Redis** plugin (or link external URLs).
+5. Add **environment variables** on the API service:
 
 ```env
 DATABASE_URL=postgresql://...
@@ -57,9 +62,9 @@ npm run db:seed
 ## Step 3 — Deploy Web (Vercel)
 
 1. [vercel.com](https://vercel.com) → **Add New Project** → import `ScribleSean/Parity`.
-2. **Root Directory:** `apps/web`
-3. Framework: **Next.js** (auto-detected). `vercel.json` handles monorepo install/build.
-4. **Environment variables** (Production):
+2. **Root Directory:** `apps/web` (as in your screenshot — correct).
+3. Framework: **Next.js**. `vercel.json` handles the monorepo build.
+4. **Delete** `EXAMPLE_NAME`. Add these **Environment Variables** (Production + Preview):
 
 ```env
 NEXT_PUBLIC_API_URL=https://your-api.up.railway.app/api/v1

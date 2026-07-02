@@ -1,0 +1,11 @@
+node_modules
+.next
+.turbo
+.git
+apps/web/.next
+apps/web/node_modules
+**/*.md
+!README.md
+coverage
+.env
+.env.*
