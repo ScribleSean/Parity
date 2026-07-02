@@ -1,0 +1,9 @@
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "services/api/Dockerfile"
+watchPatterns = ["services/api/**", "packages/shared/**", "apps/web/package.json", "package.json", "package-lock.json"]
+
+[deploy]
+healthcheckPath = "/api/v1/markets"
+healthcheckTimeout = 30
+restartPolicyType = "ON_FAILURE"

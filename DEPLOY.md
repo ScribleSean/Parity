@@ -28,8 +28,9 @@ Phase 1 is **web + API**. Mobile is Phase 2. You can ship a live beta with fake-
 1. [railway.app](https://railway.app) → your project.
 2. If you see two services (`@parity/web` + `@parity/api`), **delete `@parity/web`**.
 3. Click `@parity/api` → **Settings** → **Source**:
-   - **Root Directory:** leave **empty** (repo root `/`), **not** `services/api`
-   - Railway reads `railway.toml` at repo root and builds `services/api/Dockerfile`
+   - **Root Directory:** leave **empty** (repo root `/`)
+   - **Config file:** `services/api/railway.toml` (Railway default for this service)
+   - Builds `services/api/Dockerfile` from the monorepo root
 4. Add a **Postgres** plugin and **Redis** plugin (or link external URLs).
 5. Add **environment variables** on the API service:
 
