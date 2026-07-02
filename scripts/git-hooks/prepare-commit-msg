@@ -1,0 +1,16 @@
+#!/bin/bash
+# Strip Cursor / AI co-author trailers from commit messages (macOS + Linux)
+if [ ! -f "$1" ]; then
+  exit 0
+fi
+
+tmp="${1}.parity-hook"
+cp "$1" "$tmp"
+
+grep -viE 'co-authored-by:.*cursor|co-authored-by:.*cursoragent@cursor\.com|made-with:.*cursor' "$tmp" > "$1" || true
+rm -f "$tmp"
+
+# Trim trailing blank lines
+while [ -s "$1" ] && [ -z "$(tail -1 "$1" | tr -d '[:space:]')" ]; do
+  sed -i '' -e '$d' "$1" 2>/dev/null || sed -i '$d' "$1"
+done

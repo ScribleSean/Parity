@@ -1,0 +1,30 @@
+{
+  "name": "parity",
+  "version": "1.0.0",
+  "private": true,
+  "packageManager": "npm@11.6.2",
+  "workspaces": [
+    "apps/*",
+    "services/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo run dev",
+    "dev:apps": "npm run dev -w @parity/api & npm run dev -w @parity/web",
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "lint": "turbo run lint",
+    "setup": "node scripts/setup-local.mjs",
+    "db:generate": "npm run db:generate -w @parity/api",
+    "db:push": "npm run db:push -w @parity/api",
+    "db:migrate": "npm run db:migrate -w @parity/api",
+    "db:seed": "npm run db:seed -w @parity/api"
+  },
+  "devDependencies": {
+    "turbo": "^2.5.4",
+    "typescript": "^5.8.3"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

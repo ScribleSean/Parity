@@ -1,0 +1,253 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum MarketStatus {
+  DRAFT
+  OPEN
+  CLOSED
+  RESOLVED
+  VOID
+}
+
+enum MarketResolution {
+  YES
+  NO
+  VOID
+}
+
+enum MarketCategory {
+  Politics
+  Sports
+  Culture
+  Business
+  Science
+  Other
+}
+
+enum TradeSide {
+  BUY
+  SELL
+}
+
+enum TradeOutcome {
+  YES
+  NO
+}
+
+enum LedgerType {
+  SIGNUP_BONUS
+  REFILL_FREE
+  REFILL_AD
+  REFILL_PREMIUM
+  TRADE_BUY
+  TRADE_SELL
+  SETTLEMENT_WIN
+  ADMIN_ADJUSTMENT
+}
+
+model User {
+  id               String   @id @default(uuid())
+  email            String   @unique
+  username         String   @unique
+  displayName      String   @map("display_name")
+  avatarUrl        String?  @map("avatar_url")
+  oauthProvider    String   @map("oauth_provider")
+  oauthProviderId  String   @map("oauth_provider_id")
+  role             UserRole @default(USER)
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  wallet        Wallet?
+  trades        Trade[]
+  positions     Position[]
+  quotes        Quote[]
+  refreshTokens RefreshToken[]
+  auditLogs     AuditLog[]     @relation("AdminAuditLogs")
+  marketsCreated Market[]      @relation("MarketsCreated")
+
+  @@unique([oauthProvider, oauthProviderId])
+  @@map("users")
+}
+
+model Wallet {
+  userId               String   @id @map("user_id")
+  balanceNotional      Decimal  @default(0) @map("balance_notional") @db.Decimal(18, 2)
+  freeRefillsUsedMonth Int      @default(0) @map("free_refills_used_month")
+  adRefillsUsedToday   Int      @default(0) @map("ad_refills_used_today")
+  totalRefillsUsedToday Int     @default(0) @map("total_refills_used_today")
+  refillMonthKey       String?  @map("refill_month_key")
+  refillDayKey         String?  @map("refill_day_key")
+  lastRefillAt         DateTime? @map("last_refill_at")
+  createdAt            DateTime @default(now()) @map("created_at")
+  updatedAt            DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("wallets")
+}
+
+model LedgerEntry {
+  id            String     @id @default(uuid())
+  userId        String     @map("user_id")
+  type          LedgerType
+  amount        Decimal    @db.Decimal(18, 2)
+  balanceAfter  Decimal    @map("balance_after") @db.Decimal(18, 2)
+  referenceType String?    @map("reference_type")
+  referenceId   String?    @map("reference_id")
+  metadataJson  Json?      @map("metadata_json")
+  createdAt     DateTime   @default(now()) @map("created_at")
+
+  @@index([userId, createdAt])
+  @@map("ledger_entries")
+}
+
+model Market {
+  id              String            @id @default(uuid())
+  slug            String            @unique
+  title           String
+  description     String
+  category        MarketCategory
+  imageUrl        String?           @map("image_url")
+  status          MarketStatus      @default(DRAFT)
+  opensAt         DateTime          @map("opens_at")
+  closesAt        DateTime          @map("closes_at")
+  resolvedAt      DateTime?         @map("resolved_at")
+  resolution      MarketResolution?
+  resolutionNote  String?           @map("resolution_note")
+  liquidityParam  Decimal           @default(1000) @map("liquidity_param") @db.Decimal(18, 4)
+  qYes            Decimal           @default(0) @map("q_yes") @db.Decimal(18, 6)
+  qNo             Decimal           @default(0) @map("q_no") @db.Decimal(18, 6)
+  volumeNotional  Decimal           @default(0) @map("volume_notional") @db.Decimal(18, 2)
+  createdById     String            @map("created_by")
+  createdAt       DateTime          @default(now()) @map("created_at")
+  updatedAt       DateTime          @updatedAt @map("updated_at")
+
+  createdBy   User                 @relation("MarketsCreated", fields: [createdById], references: [id])
+  snapshots   MarketOddsSnapshot[]
+  trades      Trade[]
+  positions   Position[]
+  quotes      Quote[]
+
+  @@index([status, closesAt])
+  @@map("markets")
+}
+
+model MarketOddsSnapshot {
+  id        String   @id @default(uuid())
+  marketId  String   @map("market_id")
+  yesCents  Decimal  @map("yes_cents") @db.Decimal(6, 1)
+  noCents   Decimal  @map("no_cents") @db.Decimal(6, 1)
+  volume    Decimal  @db.Decimal(18, 2)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  market Market @relation(fields: [marketId], references: [id], onDelete: Cascade)
+
+  @@index([marketId, createdAt])
+  @@map("market_odds_snapshots")
+}
+
+model Trade {
+  id           String       @id @default(uuid())
+  marketId     String       @map("market_id")
+  userId       String       @map("user_id")
+  side         TradeSide
+  outcome      TradeOutcome
+  quantity     Decimal      @db.Decimal(18, 6)
+  priceCents   Decimal      @map("price_cents") @db.Decimal(6, 1)
+  costNotional Decimal      @map("cost_notional") @db.Decimal(18, 2)
+  createdAt    DateTime     @default(now()) @map("created_at")
+
+  market Market @relation(fields: [marketId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([marketId, createdAt])
+  @@index([userId, createdAt])
+  @@map("trades")
+}
+
+model Position {
+  id                 String       @id @default(uuid())
+  userId             String       @map("user_id")
+  marketId           String       @map("market_id")
+  outcome            TradeOutcome
+  quantity           Decimal      @db.Decimal(18, 6)
+  avgEntryCents      Decimal      @map("avg_entry_cents") @db.Decimal(6, 1)
+  costBasisNotional  Decimal      @map("cost_basis_notional") @db.Decimal(18, 2)
+  updatedAt          DateTime     @updatedAt @map("updated_at")
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  market Market @relation(fields: [marketId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, marketId, outcome])
+  @@map("positions")
+}
+
+model Quote {
+  id             String       @id @default(uuid())
+  marketId       String       @map("market_id")
+  userId         String       @map("user_id")
+  side           TradeSide
+  outcome        TradeOutcome
+  quantity       Decimal      @db.Decimal(18, 6)
+  costNotional   Decimal      @map("cost_notional") @db.Decimal(18, 2)
+  avgPriceCents  Decimal      @map("avg_price_cents") @db.Decimal(6, 1)
+  expiresAt      DateTime     @map("expires_at")
+  consumedAt     DateTime?    @map("consumed_at")
+  createdAt      DateTime     @default(now()) @map("created_at")
+
+  market Market @relation(fields: [marketId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, expiresAt])
+  @@map("quotes")
+}
+
+model RefreshToken {
+  id        String    @id @default(uuid())
+  userId    String    @map("user_id")
+  tokenHash String    @map("token_hash")
+  expiresAt DateTime  @map("expires_at")
+  revokedAt DateTime? @map("revoked_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([tokenHash])
+  @@map("refresh_tokens")
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  adminId    String   @map("admin_id")
+  action     String
+  entityType String   @map("entity_type")
+  entityId   String   @map("entity_id")
+  payloadJson Json?   @map("payload_json")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  admin User @relation("AdminAuditLogs", fields: [adminId], references: [id])
+
+  @@index([createdAt])
+  @@map("audit_log")
+}
+
+model LeaderboardCache {
+  id        String   @id @default(uuid())
+  period    String
+  dataJson  Json     @map("data_json")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([period])
+  @@map("leaderboard_cache")
+}
