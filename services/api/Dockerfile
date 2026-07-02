@@ -13,8 +13,8 @@ COPY apps/web/package.json ./apps/web/package.json
 
 RUN npm ci --workspace=@parity/shared --workspace=@parity/api
 RUN npm run build -w @parity/shared
-RUN npm run build -w @parity/api
 RUN npm run db:generate -w @parity/api
+RUN npm run build -w @parity/api
 
 FROM node:20-alpine AS runner
 WORKDIR /app
