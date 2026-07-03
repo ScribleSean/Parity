@@ -25,6 +25,7 @@ COPY --from=builder /app/packages/shared ./packages/shared
 COPY --from=builder /app/services/api/dist ./services/api/dist
 COPY --from=builder /app/services/api/prisma ./services/api/prisma
 COPY --from=builder /app/services/api/package.json ./services/api/package.json
+COPY --from=builder /app/services/api/scripts ./services/api/scripts
 
 WORKDIR /app/services/api
 RUN chmod +x scripts/start.sh
