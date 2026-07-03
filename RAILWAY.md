@@ -42,20 +42,11 @@ On **@parity/api** → **Variables**, add manually:
 
 **Redis (optional for Phase 1):** add **+ New** → **Database** → **Redis**, then reference `REDIS_URL` on @parity/api the same way as Postgres.
 
-### 4. Seed the database (once)
+### 4. Seed the database (automatic)
 
-After API deploys successfully:
+New deploys run `prisma db push` and seed on startup — **no shell required**.
 
-1. @parity/api → **Shell** (or **Connect** terminal)
-2. Run:
-
-```bash
-cd services/api
-npx prisma db push
-npm run db:seed
-```
-
-3. Admin user: `admin@parity.local` (dev login only if `DEV_AUTH_ENABLED=true`)
+If you need to re-seed manually: @parity/api → **Settings** → **Deploy** → clear any custom **Start Command** (must be empty or `./scripts/start.sh` only). A custom command like `npm run start -w @parity/api` will crash with `No workspaces found`.
 
 ### 5. Verify
 
@@ -75,7 +66,8 @@ You should see JSON like `{"items":[],"page":1,...}` — not a crash loop.
 |---------|-----|
 | Postgres added but vars only on Postgres service | References must be on **@parity/api** |
 | Typed `DATABASE_URL` manually wrong | Use **Add Reference** from Postgres service |
-| Forgot to redeploy after adding vars | Click **Deploy** on @parity/api |
+| Custom Start Command uses `npm -w @parity/api` | **Settings → Deploy → Start Command** → delete it (use Dockerfile default) |
+| `No workspaces found` on start | Same as above — never use npm workspace flags at runtime |
 | `WEB_URL` not set | API starts but browser gets CORS errors from Vercel |
 
 ---

@@ -27,5 +27,6 @@ COPY --from=builder /app/services/api/prisma ./services/api/prisma
 COPY --from=builder /app/services/api/package.json ./services/api/package.json
 
 WORKDIR /app/services/api
+RUN chmod +x scripts/start.sh
 EXPOSE 4000
-CMD ["node", "dist/main.js"]
+CMD ["./scripts/start.sh"]

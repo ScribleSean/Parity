@@ -4,6 +4,7 @@ dockerfilePath = "services/api/Dockerfile"
 watchPatterns = ["services/api/**", "packages/shared/**", "apps/web/package.json", "package.json", "package-lock.json"]
 
 [deploy]
+startCommand = "./scripts/start.sh"
 healthcheckPath = "/api/v1/markets"
-healthcheckTimeout = 30
+healthcheckTimeout = 60
 restartPolicyType = "ON_FAILURE"
