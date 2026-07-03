@@ -24,8 +24,8 @@ async function bootstrap() {
     credentials: true,
   });
   const port = process.env.PORT || 4000;
-  await app.listen(port);
-  console.log(`Parity API listening on http://localhost:${port}`);
+  await app.listen(port, '0.0.0.0');
+  console.log(`Parity API listening on 0.0.0.0:${port}`);
 }
 
 bootstrap();
