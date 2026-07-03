@@ -93,9 +93,40 @@ textarea {
 }
 
 .nav-logo {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.parity-logo {
+  display: inline-flex;
+  align-items: center;
+}
+
+.parity-wordmark {
   font-weight: 650;
   font-size: 17px;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.03em;
+  background: linear-gradient(135deg, #eef0f3 0%, #bfdbfe 55%, #6ee7b7 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.landing-brand-lockup {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.landing-brand-wordmark {
+  font-size: clamp(1.75rem, 4vw, 2.25rem) !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.04em !important;
+}
+
+.nav-logo .parity-wordmark {
+  font-size: 17px;
 }
 
 .nav-links {
@@ -375,12 +406,24 @@ textarea {
 }
 
 .landing-eyebrow {
-  font-size: 13px;
-  letter-spacing: 0.12em;
+  display: inline-block;
+  font-size: 12px;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--accent);
-  margin-bottom: 20px;
-  font-weight: 500;
+  font-weight: 700;
+  color: #bfdbfe;
+  background: linear-gradient(
+    135deg,
+    rgba(96, 165, 250, 0.2),
+    rgba(52, 211, 153, 0.08)
+  );
+  border: 1px solid rgba(96, 165, 250, 0.45);
+  padding: 9px 16px;
+  border-radius: 999px;
+  margin-bottom: 24px;
+  box-shadow:
+    0 0 28px rgba(96, 165, 250, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 .landing-title {
@@ -403,11 +446,18 @@ textarea {
   margin-bottom: 16px;
 }
 
+.landing-carousel-slot {
+  display: inline-block;
+  vertical-align: baseline;
+  transition: width 0.35s var(--ease);
+  overflow: visible;
+}
+
 .landing-carousel-word {
   display: inline-block;
   color: var(--text);
   font-weight: 600;
-  min-width: 140px;
+  white-space: nowrap;
   opacity: 0;
   transform: translateY(6px);
   transition: opacity 0.28s var(--ease), transform 0.28s var(--ease);
@@ -484,20 +534,26 @@ textarea {
 
 .landing-ticker-track {
   display: flex;
-  white-space: nowrap;
-  animation: ticker 40s linear infinite;
+  width: max-content;
+  will-change: transform;
+  animation: ticker-scroll var(--ticker-duration, 35s) linear infinite;
+}
+
+.landing-ticker-segment {
+  flex-shrink: 0;
   font-size: 11px;
   color: var(--text-muted);
   letter-spacing: 0.04em;
+  white-space: nowrap;
 }
 
-.landing-ticker-track span {
-  padding-right: 48px;
-}
-
-@keyframes ticker {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
+@keyframes ticker-scroll {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
 }
 
 @media (min-width: 768px) {
@@ -1303,4 +1359,226 @@ textarea {
   color: var(--text);
   background: rgba(96, 165, 250, 0.15);
   box-shadow: 0 0 0 1px rgba(96, 165, 250, 0.25);
+}
+
+/* ——— Recent activity feed (Kalshi-style) ——— */
+.activity-feed-card {
+  padding: 0;
+  overflow: hidden;
+}
+
+.activity-feed {
+  padding: 16px 0 4px;
+}
+
+.activity-feed-header {
+  padding: 0 16px 12px;
+}
+
+.activity-feed-title {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.activity-feed-title-muted {
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.activity-feed-empty {
+  padding: 8px 16px 16px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.activity-feed-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.activity-feed-item {
+  padding: 14px 16px;
+  border-top: 1px solid var(--border);
+}
+
+.activity-feed-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.activity-feed-user,
+.activity-feed-time {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.activity-feed-action {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.activity-trade-icon {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 5px;
+  margin-top: 1px;
+  background: linear-gradient(135deg, var(--icon-a) 50%, var(--icon-b) 50%);
+}
+
+.activity-trade-icon--yes {
+  --icon-a: #c084fc;
+  --icon-b: #f8fafc;
+}
+
+.activity-trade-icon--no {
+  --icon-a: #fb7185;
+  --icon-b: #f8fafc;
+}
+
+.activity-feed-action-text {
+  font-size: 14px;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.activity-feed-verb {
+  font-weight: 600;
+}
+
+.activity-feed-verb--buy {
+  color: var(--yes);
+}
+
+.activity-feed-verb--sell {
+  color: var(--no);
+}
+
+.activity-feed-detail {
+  margin: 0 0 0 32px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* ——— Brand concept review ——— */
+.brand-concepts {
+  max-width: 960px;
+  padding-bottom: 64px;
+}
+
+.brand-concepts-header {
+  margin-bottom: 40px;
+}
+
+.brand-concepts-eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
+.brand-concepts-header h1 {
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 650;
+  letter-spacing: -0.03em;
+  margin-bottom: 8px;
+}
+
+.brand-concepts-sub {
+  color: var(--text-muted);
+  font-size: 15px;
+  max-width: 52ch;
+}
+
+.brand-concepts-current {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.02);
+  margin-bottom: 32px;
+}
+
+.brand-concepts-label {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.brand-concepts-grid {
+  display: grid;
+  gap: 20px;
+}
+
+@media (min-width: 768px) {
+  .brand-concepts-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.brand-concept-card {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.02);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.brand-concept-preview {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 120px;
+  border-radius: 10px;
+  background: rgba(12, 13, 16, 0.6);
+}
+
+.brand-concept-meta h2 {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin-bottom: 4px;
+}
+
+.brand-concept-meta p {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+
+.brand-concept-id {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: #60a5fa;
+  margin-bottom: 6px;
+}
+
+.brand-concept-lockup {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+
+.brand-concept-sizes {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  opacity: 0.9;
 }

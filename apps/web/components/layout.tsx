@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { ParityLogo } from '@/components/brand/ParityLogo';
 import { formatNotional } from '@/lib/format';
 import { useWallet } from '@/lib/wallet-context';
 
@@ -14,7 +15,7 @@ export function Nav() {
     <header className={`nav ${isLanding ? 'nav-landing' : ''}`}>
       <div className="container nav-inner">
         <Link href="/" className="nav-logo">
-          Parity
+          <ParityLogo />
         </Link>
         <nav className="nav-links">
           <Link href="/markets">Markets</Link>

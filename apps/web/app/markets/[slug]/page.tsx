@@ -7,6 +7,7 @@ import { api } from '@/lib/api';
 import { subscribeMarket } from '@/lib/ws';
 import { StatusBadge } from '@/components/layout';
 import { MarketOddsChart } from '@/components/markets/MarketOddsChart';
+import { RecentTradesFeed, type RecentTrade } from '@/components/markets/RecentTradesFeed';
 import { TradePanel, type TradeMarket } from '@/components/trade/TradePanel';
 import { formatNotional } from '@/lib/format';
 import type { LmsrState } from '@parity/shared';
@@ -31,18 +32,18 @@ export default function MarketDetailPage() {
   const slug = params.slug as string;
   const [market, setMarket] = useState<Market | null>(null);
   const [history, setHistory] = useState<HistoryPoint[]>([]);
-  const [trades, setTrades] = useState<Array<Record<string, unknown>>>([]);
+  const [trades, setTrades] = useState<RecentTrade[]>([]);
   const [loggedIn, setLoggedIn] = useState(false);
 
   const refreshMarket = useCallback(() => {
     api<Market>(`/markets/${slug}`).then(setMarket);
-    api<Array<Record<string, unknown>>>(`/markets/${slug}/trades`).then(setTrades);
+    api<RecentTrade[]>(`/markets/${slug}/trades`).then(setTrades);
   }, [slug]);
 
   useEffect(() => {
     api<Market>(`/markets/${slug}`).then(setMarket);
     api<HistoryPoint[]>(`/markets/${slug}/history`).then(setHistory);
-    api<Array<Record<string, unknown>>>(`/markets/${slug}/trades`).then(setTrades);
+    api<RecentTrade[]>(`/markets/${slug}/trades`).then(setTrades);
     api('/users/me').then(() => setLoggedIn(true)).catch(() => setLoggedIn(false));
   }, [slug]);
 
@@ -131,30 +132,8 @@ export default function MarketDetailPage() {
         )}
       </div>
 
-      <div className="card" style={{ padding: 16 }}>
-        <h2 style={{ fontSize: 14, fontWeight: 600, marginBottom: 12 }}>Recent trades</h2>
-        <table className="table">
-          <thead>
-            <tr>
-              <th>User</th>
-              <th>Side</th>
-              <th>Outcome</th>
-              <th>Qty</th>
-              <th>Price</th>
-            </tr>
-          </thead>
-          <tbody>
-            {trades.map((t, i) => (
-              <tr key={i}>
-                <td>{t.username as string}</td>
-                <td>{t.side as string}</td>
-                <td>{t.outcome as string}</td>
-                <td className="tabular">{t.quantity as number}</td>
-                <td className="tabular">{t.priceCents as number}¢</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div className="card activity-feed-card">
+        <RecentTradesFeed trades={trades} />
       </div>
     </div>
   );
