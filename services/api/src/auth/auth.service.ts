@@ -162,16 +162,27 @@ export class AuthService {
     });
 
     const isProd = this.config.get('NODE_ENV') === 'production';
-    res.cookie('access_token', accessToken, {
+    const webUrl = this.config.get<string>('WEB_URL') || '';
+    const apiUrl = this.config.get<string>('API_URL') || '';
+    let crossSite = false;
+    try {
+      if (isProd && webUrl && apiUrl) {
+        crossSite = new URL(webUrl).host !== new URL(apiUrl).host;
+      }
+    } catch {
+      crossSite = isProd;
+    }
+    const cookieOpts = {
       httpOnly: true,
-      secure: isProd,
-      sameSite: 'lax',
+      secure: isProd || crossSite,
+      sameSite: (crossSite ? 'none' : 'lax') as 'none' | 'lax',
+    };
+    res.cookie('access_token', accessToken, {
+      ...cookieOpts,
       maxAge: 15 * 60 * 1000,
     });
     res.cookie('refresh_token', refreshRaw, {
-      httpOnly: true,
-      secure: isProd,
-      sameSite: 'lax',
+      ...cookieOpts,
       maxAge: days * 86400000,
       path: '/api/v1/auth/refresh',
     });
