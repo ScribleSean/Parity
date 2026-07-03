@@ -162,30 +162,44 @@ export class AuthService {
     });
 
     const isProd = this.config.get('NODE_ENV') === 'production';
-    const webUrl = this.config.get<string>('WEB_URL') || '';
-    const apiUrl = this.config.get<string>('API_URL') || '';
-    let crossSite = false;
-    try {
-      if (isProd && webUrl && apiUrl) {
-        crossSite = new URL(webUrl).host !== new URL(apiUrl).host;
-      }
-    } catch {
-      crossSite = isProd;
-    }
-    const cookieOpts = {
+    const cross = this.isCrossOriginCookies();
+    const base = {
       httpOnly: true,
-      secure: isProd || crossSite,
-      sameSite: (crossSite ? 'none' : 'lax') as 'none' | 'lax',
+      secure: isProd || cross,
+      sameSite: (cross ? 'none' : 'lax') as 'none' | 'lax',
     };
     res.cookie('access_token', accessToken, {
-      ...cookieOpts,
+      ...base,
       maxAge: 15 * 60 * 1000,
+      path: '/',
     });
     res.cookie('refresh_token', refreshRaw, {
-      ...cookieOpts,
+      ...base,
       maxAge: days * 86400000,
       path: '/api/v1/auth/refresh',
     });
+  }
+
+  /** Vercel web + Railway API need SameSite=None cookies */
+  private isCrossOriginCookies(): boolean {
+    if (this.config.get('NODE_ENV') !== 'production') return false;
+    try {
+      const web = new URL(this.config.get('WEB_URL') || 'http://localhost:3000');
+      const api = new URL(this.config.get('API_URL') || 'http://localhost:4000');
+      return web.host !== api.host;
+    } catch {
+      return false;
+    }
+  }
+
+  private cookieClearOpts(path: string) {
+    const isProd = this.config.get('NODE_ENV') === 'production';
+    const cross = this.isCrossOriginCookies();
+    return {
+      path,
+      secure: isProd || cross,
+      sameSite: (cross ? 'none' : 'lax') as 'none' | 'lax',
+    };
   }
 
   async refresh(refreshToken: string, res: Response) {
@@ -218,8 +232,8 @@ export class AuthService {
         data: { revokedAt: new Date() },
       });
     }
-    res.clearCookie('access_token');
-    res.clearCookie('refresh_token', { path: '/api/v1/auth/refresh' });
+    res.clearCookie('access_token', this.cookieClearOpts('/'));
+    res.clearCookie('refresh_token', this.cookieClearOpts('/api/v1/auth/refresh'));
     return { ok: true };
   }
 

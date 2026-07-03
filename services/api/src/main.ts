@@ -19,8 +19,9 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.setGlobalPrefix('api/v1');
   app.use(cookieParser());
+  const webUrl = (process.env.WEB_URL || 'http://localhost:3000').replace(/\/$/, '');
   app.enableCors({
-    origin: process.env.WEB_URL || 'http://localhost:3000',
+    origin: webUrl,
     credentials: true,
   });
   const port = process.env.PORT || 4000;
